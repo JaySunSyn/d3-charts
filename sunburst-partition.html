@@ -8,7 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="../d3/d3.min.js"></script>
 
 <dom-module id="sunburst-partition">
 
@@ -22,9 +22,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     form {
-      position: absolute;
+      position: relative;
       right: 10px;
       top: 10px;
+    }
+
+    .sunburstPartition{
+      /*width: 300px;*/
+      height: 500px;
     }
 
   </style>
@@ -34,6 +39,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <label><input type="radio" name="mode" value="size"> Size</label>
       <label><input type="radio" name="mode" value="count" checked> Count</label>
     </form>
+
+    <div class="sunburstPartition"></div>
 
   </template>
 
@@ -46,79 +53,83 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is: 'sunburst-partition',
 
     properties: {
-    }
+    },
 
-  });
+    attached:function(){
+      this.plot();
+    },
 
-</script>
+    plot:function(){
+      var width = 480,
+      height = 350,
+      radius = Math.min(width, height) / 2,
+      color = d3.scale.category20c();
 
-<script>
+      var svg = d3.select(".sunburstPartition").append("svg")
+          .attr("width", width)
+          .attr("height", height)
+        .append("g")
+          .attr("transform", "translate(" + width / 2 + "," + height * .52 + ")");
 
-var width = 960,
-    height = 700,
-    radius = Math.min(width, height) / 2,
-    color = d3.scale.category20c();
+      var partition = d3.layout.partition()
+          .sort(null)
+          .size([2 * Math.PI, radius * radius])
+          .value(function(d) { return 1; });
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height)
-  .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height * .52 + ")");
+      var arc = d3.svg.arc()
+          .startAngle(function(d) { return d.x; })
+          .endAngle(function(d) { return d.x + d.dx; })
+          .innerRadius(function(d) { return Math.sqrt(d.y); })
+          .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-var partition = d3.layout.partition()
-    .sort(null)
-    .size([2 * Math.PI, radius * radius])
-    .value(function(d) { return 1; });
+      d3.json("flare.json", function(error, root) {
+        if (error) throw error;
 
-var arc = d3.svg.arc()
-    .startAngle(function(d) { return d.x; })
-    .endAngle(function(d) { return d.x + d.dx; })
-    .innerRadius(function(d) { return Math.sqrt(d.y); })
-    .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+        var path = svg.datum(root).selectAll("path")
+            .data(partition.nodes)
+          .enter().append("path")
+            .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+            .attr("d", arc)
+            .style("stroke", "#fff")
+            .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+            .style("fill-rule", "evenodd")
+            .each(stash);
 
-d3.json("flare.json", function(error, root) {
-  if (error) throw error;
+        d3.selectAll("input").on("change", function change() {
+          var value = this.value === "count"
+              ? function() { return 1; }
+              : function(d) { return d.size; };
 
-  var path = svg.datum(root).selectAll("path")
-      .data(partition.nodes)
-    .enter().append("path")
-      .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
-      .attr("d", arc)
-      .style("stroke", "#fff")
-      .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-      .style("fill-rule", "evenodd")
-      .each(stash);
+          path
+              .data(partition.value(value).nodes)
+            .transition()
+              .duration(1500)
+              .attrTween("d", arcTween);
+        });
+      });
 
-  d3.selectAll("input").on("change", function change() {
-    var value = this.value === "count"
-        ? function() { return 1; }
-        : function(d) { return d.size; };
+      // Stash the old values for transition.
+      function stash(d) {
+        d.x0 = d.x;
+        d.dx0 = d.dx;
+      }
 
-    path
-        .data(partition.value(value).nodes)
-      .transition()
-        .duration(1500)
-        .attrTween("d", arcTween);
-  });
+      // Interpolate the arcs in data space.
+      function arcTween(a) {
+        var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
+        return function(t) {
+          var b = i(t);
+          a.x0 = b.x;
+          a.dx0 = b.dx;
+          return arc(b);
+        };
+      }
+
+      d3.select(self.frameElement).style("height", height + "px");
+
+  }
+
 });
 
-// Stash the old values for transition.
-function stash(d) {
-  d.x0 = d.x;
-  d.dx0 = d.dx;
-}
-
-// Interpolate the arcs in data space.
-function arcTween(a) {
-  var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
-  return function(t) {
-    var b = i(t);
-    a.x0 = b.x;
-    a.dx0 = b.dx;
-    return arc(b);
-  };
-}
-
-d3.select(self.frameElement).style("height", height + "px");
-
 </script>
+

@@ -1,0 +1,73 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<script src="../d3/d3.min.js"></script>
+
+<dom-module id="bar-chart">
+
+  <style>
+    :host {
+
+    }
+
+    .bchart div{
+      font: 10px sans-serif;
+      background-color: lightblue !important;
+      text-align: right;
+      padding: 3px;
+      margin: 1px;
+      color: white;
+    }
+
+  </style>
+
+  <template>
+    <div>Bar</div>
+    <div class="bchart"></div>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'bar-chart',
+
+    properties: {
+    },
+
+    attached:function(){
+      var data = [4, 8, 15, 16, 23, 42];
+
+      var x = d3.scale.linear()
+          .domain([0, d3.max(data)])
+          .range([0, 420]);
+
+      d3.select(".bchart")
+        .selectAll("div")
+          .data(data)
+        .enter().append("div")
+          .style("width", function(d) { return x(d) + "px"; })
+          .style("background-color", "lightblue")
+          .style("font", "10px sans-serif")
+          .style("background-color", "lightblue")
+          .style("text-align", "right")
+          .style("padding", "3px")
+          .style("margin", "1px")
+          .style("color", "white")
+          .text(function(d) { return d; });
+    
+    }
+
+  });
+
+</script>
+
