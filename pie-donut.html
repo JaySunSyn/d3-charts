@@ -40,7 +40,7 @@ Example:
   </style>
 
   <template>
-    <div id="pieDonut" class="pieDonut"></div>
+    <div id="{{elementId}}" class="pieDonut"></div>
   </template>
 
 </dom-module>
@@ -92,25 +92,34 @@ Example:
         type:Array,
         value:["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"],
         observer:'update'
+      },
+
+      elementId:{
+        type:String,
+        value:''
       }
 
     },
 
     attached:function(){
+      this.elementId = 'd3PieDonut_' + String(new Date().getTime());
       this.plot();
     },
 
     update:function(){
-      this.plot();
+      if (this.elementId) {
+        this.plot();
+      };
     },
 
     plot:function(){
-      this.$.pieDonut.innerHTML = '';
+
+      document.getElementById(this.elementId).innerHTML = '';
 
       var color = d3.scale.ordinal()
             .range(this.colorRange);
 
-      var canvas = d3.select('.pieDonut').append('svg')
+      var canvas = d3.select('#' + this.elementId).append('svg')
             .attr('width',this.xwidth)
             .attr('height',this.xheight);
 
