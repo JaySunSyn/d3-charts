@@ -8,7 +8,7 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
-<script src="../d3/d3.min.js"></script>
+<link rel="import" href="../import-d3/import-d3.html">
 
 <dom-module id="stream-graph">
 
@@ -17,17 +17,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: block;
     }
 
-    .streamGraph {
-      height: 300px;
-      width: 300px;
-    }
-
   </style>
 
   <template>
-    <!-- <button on-tap="plot">Update</button> -->
     <div class="streamGraph"></div>
-
   </template>
 
 </dom-module>

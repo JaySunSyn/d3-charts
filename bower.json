@@ -2,7 +2,7 @@
   "name": "d3-charts",
   "version": "1.0.0",
   "authors": [
-    "Jalal Fathi <jfathi.mail@gmail.com>"
+    "Jalal Fathi <jfathi.mail@gmail.com> (http://jalal.io)"
   ],
   "description": "An element providing a solution to no problem in particular.",
   "keywords": [
@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
-    "d3": "~3.5.6"
+    "import-d3": "*"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",

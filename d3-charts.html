@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="sunburst-partition.html">
 <link rel="import" href="stream-graph.html">
 <link rel="import" href="bar-chart.html">
+<link rel="import" href="pie-donut.html">
 
 <!--
 An element providing a solution to no problem in particular.
@@ -23,18 +24,31 @@ Example:
 -->
 <dom-module id="d3-charts">
 
-  <style>
+  <style is="custom-style">
     :host {
       display: block;
       box-sizing: border-box;
+      height: 800px;
+      width: 100%;
+    }
+
+    div{
+      padding-top:24px;
     }
 
   </style>
 
   <template>
-    <div>d3 chartsss</div>
+    <button on-tap="refresh">Update</button>
+
+    <div>Pie Donut</div>
+    <pie-donut id="pieDonut" class="pie"></pie-donut>
+
+    <div>D3 Bar</div>
     <bar-chart></bar-chart>
+    <div>D3 Sunburst</div>
     <sunburst-partition></sunburst-partition>
+    <div>D3 Stream Graph</div>
     <stream-graph></stream-graph>
   </template>
 
@@ -46,7 +60,9 @@ Example:
 
     is: 'd3-charts',
 
-    properties: {
+    refresh:function(){
+      this.$.pieDonut.innerRadius = 10;
+      this.$.pieDonut.data = [[5,'hahaha'],[30,'was'],[50,'los']];
     }
 
   });

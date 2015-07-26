@@ -1,0 +1,147 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../import-d3/import-d3.html">
+
+<!--
+An element providing a solution to no problem in particular.
+
+Example:
+
+    <pie-donut></pie-donut>
+
+@demo
+-->
+
+<dom-module id="pie-donut">
+
+  <style is="custom-style">
+    :host {
+      display: block;
+      box-sizing: border-box;   
+    }
+
+    .arc path {
+      stroke: #fff;
+    }
+
+    .pieDonut{
+      text-anchor:middle;
+      font-size:1.3em;
+    }
+
+  </style>
+
+  <template>
+    <div id="pieDonut" class="pieDonut"></div>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'pie-donut',
+
+    properties: {
+      data:{
+        type:Array,
+        value:[[10,'hi'],[90,'was'],[50,'los']],
+        observer:'update'
+      },
+
+      labels:{
+        type:Array,
+        value:['Ja','nein','maybe'],
+        observer:'update'
+      },
+
+      radius:{
+        type:Number,
+        value:300,
+        observer:'update'
+      },
+
+      innerRadius:{
+        type:Number,
+        value:200,
+        observer:'update'
+      },
+
+      xheight:{
+        type:Number,
+        value:600,
+        observer:'update'
+      },
+
+      xwidth:{
+        type:Number,
+        value:600,
+        observer:'update'
+      },
+
+      colorRange:{
+        type:Array,
+        value:["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"],
+        observer:'update'
+      }
+
+    },
+
+    attached:function(){
+      this.plot();
+    },
+
+    update:function(){
+      this.plot();
+    },
+
+    plot:function(){
+      this.$.pieDonut.innerHTML = '';
+
+      var color = d3.scale.ordinal()
+            .range(this.colorRange);
+
+      var canvas = d3.select('.pieDonut').append('svg')
+            .attr('width',this.xwidth)
+            .attr('height',this.xheight);
+
+      var group = canvas.append('g')
+            .attr('transform','translate(' + this.radius + ',' + this.radius + ')');
+
+      var arc = d3.svg.arc()
+            .innerRadius(this.innerRadius)
+            .outerRadius(this.radius);
+
+      var pie = d3.layout.pie()
+            .value(function(d) { return d[0]; });
+
+      var arcs = group.selectAll('.arc')
+            .data(pie(this.data))
+            .enter()
+            .append('g')
+            .attr('class','arc');
+
+      arcs.append('path')
+          .attr('d', arc)
+          .attr('fill',function (d) { return color(d.data[0]); });
+
+      arcs.append('text')
+          .attr('transform', function (d) { return 'translate(' + arc.centroid(d) + ')'; })
+          .attr('class','label')
+          .text(function(d) { return d.data[1]; });
+
+    }
+
+});
+
+</script>
+
