@@ -72,26 +72,22 @@ Example:
 
       innerRadius:{
         type:Number,
-        value:200,
-        observer:'update'
+        value:200
       },
 
-      xheight:{
+      chartHeight:{
         type:Number,
-        value:600,
-        observer:'update'
+        value:600
       },
 
-      xwidth:{
+      chartWidth:{
         type:Number,
-        value:600,
-        observer:'update'
+        value:600
       },
 
       colorRange:{
         type:Array,
-        value:["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"],
-        observer:'update'
+        value:["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]
       },
 
       elementId:{
@@ -114,14 +110,16 @@ Example:
 
     plot:function(){
 
+      console.log(this.innerRadius);
+
       document.getElementById(this.elementId).innerHTML = '';
 
       var color = d3.scale.ordinal()
             .range(this.colorRange);
 
       var canvas = d3.select('#' + this.elementId).append('svg')
-            .attr('width',this.xwidth)
-            .attr('height',this.xheight);
+            .attr('width',this.chartWidth)
+            .attr('height',this.chartHeight);
 
       var group = canvas.append('g')
             .attr('transform','translate(' + this.radius + ',' + this.radius + ')');
