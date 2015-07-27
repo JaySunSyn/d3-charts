@@ -34,7 +34,7 @@ Example:
 
     .pieDonut{
       text-anchor:middle;
-      font-size:1.3em;
+      font-size:0.7em;
     }
 
   </style>
@@ -55,12 +55,6 @@ Example:
       data:{
         type:Array,
         value:[[10,'hi'],[90,'was'],[50,'los']],
-        observer:'update'
-      },
-
-      labels:{
-        type:Array,
-        value:['Ja','nein','maybe'],
         observer:'update'
       },
 
@@ -109,8 +103,6 @@ Example:
     },
 
     plot:function(){
-
-      console.log(this.innerRadius);
 
       document.getElementById(this.elementId).innerHTML = '';
 
