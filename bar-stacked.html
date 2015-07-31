@@ -1,0 +1,281 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../import-d3/import-d3.html">
+<!--
+An element providing a solution to no problem in particular.
+
+Example:
+
+    <pie-donut></pie-donut>
+
+@demo
+-->
+
+<dom-module id="bar-stacked">
+
+  <style is="custom-style">
+    :host {
+      display: block;
+      box-sizing: border-box;   
+    }
+
+    text {
+      font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    form {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+  </style>
+
+  <template>
+    <button on-tap="update">new</button>
+    <div id="{{elementId}}"></div>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'bar-stacked',
+
+    properties: {
+      data:{
+        type:Array,
+        value:[[10,'hi'],[90,'was'],[50,'los']],
+        observer:'update'
+      },
+
+      stacked:{
+        type:Boolean,
+        value:true
+      },
+
+      elementId:{
+        type:String,
+        value:''
+      }
+
+    },
+
+    attached:function(){
+      this.elementId = 'd3PieDonut_' + String(new Date().getTime());
+      this.plot();
+    },
+
+    update:function(){
+      if (this.elementId) {
+        this.plot();
+      };
+    },
+
+    plot:function(){
+
+      var sampleData = {"m20_39":4, "m0_19":1, "f0_19":0.5,"m40_59":4,"m60":6,"f60":4,"f40_59":8,"f20_39":7};
+
+      var sampleCams = [{name:'cam_1',data:sampleData},{name:'cam_2',data:sampleData},{name:'cam_3',data:sampleData},{name:'cam_4',data:sampleData}];
+
+      var w = 960,
+          h = 500;
+
+      
+      var camData=[];
+      for (var i = sampleCams.length - 1; i >= 0; i--) {
+        camData.push(sampleCams[i].data);
+      };
+
+      var keys = [];
+      for(var k in camData[0]) keys.push(k);
+
+      var data = [];
+      for (var i = keys.length - 1; i >= 0; i--) {
+
+        var objData = [];
+        var k = keys[i]
+
+        for (var j = camData.length - 1; j >= 0; j--) {
+          objData.push({x:j,y:camData[j][k]});
+        };
+
+        data.push(objData);
+      };
+
+      document.querySelector("#" + this.elementId).innerHTML='';
+      this.stacked = !this.stacked;
+
+      var keys = [];
+      for(var k in data[0]) keys.push(k);
+
+      var m = keys.length, // number of layers
+      n = data.length, // number of samples per layer
+
+      stack = d3.layout.stack(),
+
+      layers = stack(data.map(function(d,i) { return d.map(function(d,i){ return d}); })),
+
+      yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
+      yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
+
+      var margin = {top: 40, right: 10, bottom: 20, left: 10},
+          width = w - margin.left - margin.right,
+          height = h - margin.top - margin.bottom;
+
+      var x = d3.scale.ordinal()
+          .domain(d3.range(m))
+          .rangeRoundBands([0, width], .08);
+
+      var y = d3.scale.linear()
+          .domain([0, yStackMax])
+          .range([height, 0]);
+
+      var color = d3.scale.linear()
+          .domain([0, n - 1])
+          .range(["#aad", "#556"]);
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .tickSize(0)
+          .tickPadding(6)
+          .orient("bottom");
+
+      var svg = d3.select("#" + this.elementId).append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+      var layer = svg.selectAll(".layer")
+          .data(layers)
+        .enter().append("g")
+          .attr("class", "layer")
+          .style("fill", function(d, i) { return color(i); });
+
+      var rect = layer.selectAll("rect")
+          .data(function(d) { return d; })
+        .enter().append("rect")
+          .attr("x", function(d) { return x(d.x); })
+          .attr("y", height)
+          .attr("width", x.rangeBand())
+          .attr("height", 0);
+
+      rect.transition()
+          .delay(function(d, i) { return i * 10; })
+          .attr("y", function(d) { return y(d.y0 + d.y); })
+          .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
+
+      // svg.append("g")
+      //     .attr("class", "x axis")
+      //     .attr("transform", "translate(0," + height + ")")
+      //     .call(xAxis);
+
+      var barWidth = width / data.length;
+
+      // svg.append("text")
+      // .attr("x", barWidth / 2)
+      // .attr("y", height + 3)
+      // .attr("dy", ".75em")
+      // .attr("text", function(d) { return d; });
+
+
+
+        // Add a label per date.
+      var label = svg.selectAll("text")
+          .data(x.domain())
+        .enter().append("svg:text")
+          .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
+          .attr("y", 450)
+          .attr("text-anchor", "middle")
+          .attr("dy", ".71em")
+          .text('format');
+
+      // // Add y-axis rules.
+      var rule = svg.selectAll("g.rule")
+          .data(y.ticks(5))
+        .enter().append("svg:g")
+          .attr("class", "rule")
+          .attr("transform", function(d) { return "translate(0," + -y(d) + ")"; });
+
+      var p = [20, 50, 30, 20];
+      rule.append("svg:line")
+          .attr("x2", w - p[1] - p[3])
+          .style("stroke", function(d) { return d ? "#fff" : "#000"; })
+          .style("stroke-opacity", function(d) { return d ? .7 : null; });
+
+
+      rule.append("svg:text")
+          .attr("x", w - p[1] - p[3] + 6)
+          .attr("dy", ".35em")
+          .text(d3.format(",d"));
+
+
+      if (this.stacked) {
+        transitionStacked()
+      } else{
+        transitionGrouped()
+      };
+
+      function transitionGrouped() {
+        y.domain([0, yGroupMax]);
+
+        rect.transition()
+            .duration(500)
+            .delay(function(d, i) { return i * 10; })
+            .attr("x", function(d, i, j) { return x(d.x) + x.rangeBand() / n * j; })
+            .attr("width", x.rangeBand() / n)
+          .transition()
+            .attr("y", function(d) { return y(d.y); })
+            .attr("height", function(d) { return height - y(d.y); });
+      }
+
+      function transitionStacked() {
+        y.domain([0, yStackMax]);
+
+        rect.transition()
+            .duration(500)
+            .delay(function(d, i) { return i * 10; })
+            .attr("y", function(d) { return y(d.y0 + d.y); })
+            .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+          .transition()
+            .attr("x", function(d) { return x(d.x); })
+            .attr("width", x.rangeBand());
+      }
+
+      // Inspired by Lee Byron's test data generator.
+      function bumpLayer(d, idx) {
+
+        var data = d.data;
+        var keys = [];
+        for(var k in d.data) keys.push(k);
+
+        console.log(idx);
+        console.log(keys);
+
+        return keys.map(function(k,i) { return {x: idx, y: data[k]}; });
+      }
+    }
+
+});
+
+</script>
+

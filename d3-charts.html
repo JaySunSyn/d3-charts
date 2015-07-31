@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="stream-graph.html">
 <link rel="import" href="bar-chart.html">
 <link rel="import" href="pie-donut.html">
+<link rel="import" href="bar-stacked.html">
 
 <!--
 An element providing a solution to no problem in particular.
@@ -41,7 +42,10 @@ Example:
   <template>
     <button on-tap="refresh">Update</button>
 
-    <div>Pie Donut</div>
+    <div>Stacked Bars</div>
+    <bar-stacked></bar-stacked>
+
+<!--     <div>Pie Donut</div>
     <pie-donut id="pieDonut" class="pie"></pie-donut>
 
     <div>D3 Bar</div>
@@ -49,7 +53,7 @@ Example:
     <div>D3 Sunburst</div>
     <sunburst-partition></sunburst-partition>
     <div>D3 Stream Graph</div>
-    <stream-graph></stream-graph>
+    <stream-graph></stream-graph> -->
   </template>
 
 </dom-module>
