@@ -38,6 +38,19 @@ Example:
       shape-rendering: crispEdges;
     }
 
+    div.tooltip {   
+      position: absolute;           
+      text-align: center;           
+      width: 60px;                  
+      height: 28px;                 
+      padding: 2px;             
+      font: 12px sans-serif;        
+      background: lightsteelblue;   
+      border: 0px;      
+      border-radius: 8px;           
+      pointer-events: none;         
+    }
+
     form {
       position: absolute;
       right: 10px;
@@ -136,7 +149,7 @@ Example:
       yGroupMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y; }); }),
       yStackMax = d3.max(layers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); });
 
-      var margin = {top: 40, right: 10, bottom: 20, left: 10},
+      var margin = {top: 40, right: 10, bottom: 40, left: 10},
           width = w - margin.left - margin.right,
           height = h - margin.top - margin.bottom;
 
@@ -184,30 +197,19 @@ Example:
           .attr("y", function(d) { return y(d.y0 + d.y); })
           .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); });
 
-      // svg.append("g")
-      //     .attr("class", "x axis")
-      //     .attr("transform", "translate(0," + height + ")")
-      //     .call(xAxis);
 
-      var barWidth = width / data.length;
-
-      // svg.append("text")
-      // .attr("x", barWidth / 2)
-      // .attr("y", height + 3)
-      // .attr("dy", ".75em")
-      // .attr("text", function(d) { return d; });
-
-
-
-        // Add a label per date.
+        // Add a label x axis.
       var label = svg.selectAll("text")
           .data(x.domain())
         .enter().append("svg:text")
           .attr("x", function(d) { return x(d) + x.rangeBand() / 2; })
-          .attr("y", 450)
+          .attr("y", h - margin.top - margin.bottom + 3)
           .attr("text-anchor", "middle")
           .attr("dy", ".71em")
-          .text('format');
+          .text( function(x){ return sampleCams[x]['name']; });
+
+      // 
+
 
       // // Add y-axis rules.
       var rule = svg.selectAll("g.rule")
